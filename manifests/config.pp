@@ -1,6 +1,6 @@
-# == Class: letsencrypt
+# @summary Configures the Let's Encrypt client.
 #
-#   This class configures the Let's Encrypt client. This is a private class.
+# @api private
 #
 class letsencrypt::config (
   $config_dir          = $letsencrypt::config_dir,
@@ -46,7 +46,14 @@ class letsencrypt::config (
     }
   }
 
-  $_config_joined = join_keys_to_values($_config, '=')
-  letsencrypt::config::ini { $_config_joined: }
-
+  $_config.each |$key,$value| {
+    ini_setting { "${config_file} ${key} ${value}":
+      ensure  => present,
+      path    => $config_file,
+      section => '',
+      setting => $key,
+      value   => $value,
+      require => File[$config_dir],
+    }
+  }
 }
